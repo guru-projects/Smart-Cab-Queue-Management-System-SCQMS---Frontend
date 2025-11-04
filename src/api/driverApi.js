@@ -1,4 +1,4 @@
-import api from "./axiosInstance";
+import api from "./axiosInstance.js";
 
 export const driverLogin = (payload) => api.post("/auth/driver/login", payload);
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LocationButton from "../../components/LocationButton";
-import { getMyCab } from "../../api/driverApi";
+import { getMyCab } from "../../api/driverApi.js";
 import { useAuth } from "../../context/AuthContext";
 
 export default function DriverDashboard() {
