@@ -1,0 +1,45 @@
+import React, { useEffect, useState } from "react";
+import { getAllCabs } from "../../api/driverApi";
+import MapView from "../../components/MapView";
+
+export default function AdminDashboard() {
+  const [cabs, setCabs] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function load() {
+      try {
+        const res = await getAllCabs();
+        if (isMounted && res?.data?.cabs) {
+          setCabs(res.data.cabs);
+        }
+      } catch (err) {
+        console.error("Failed to fetch cabs:", err);
+      }
+    }
+
+    load();
+
+    const intervalId = setInterval(load, 8000);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>Admin Dashboard — Live Cabs</h2>
+      <MapView cabs={cabs} />
+      <div style={{ marginTop: 12 }}>
+        {cabs.map((cab) => (
+          <div key={cab.id}>
+            <b>{cab.cabNumber}</b> — {cab.status} — Updated:{" "}
+            {new Date(cab.updatedAt).toLocaleString()}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
