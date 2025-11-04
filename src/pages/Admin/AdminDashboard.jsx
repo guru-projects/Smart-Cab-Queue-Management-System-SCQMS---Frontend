@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllCabs } from "../../api/driverApi";
+import { getAllCabs } from "../../api/driverApi.js";
 import MapView from "../../components/MapView";
 
 export default function AdminDashboard() {

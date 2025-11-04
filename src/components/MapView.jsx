@@ -1,25 +1,27 @@
-import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
-// fix default icon path if necessary (Leaflet default icon needs a setup in some build systems)
+const cabIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/854/854894.png",
+  iconSize: [30, 30],
+});
 
-export default function MapView({ center = [13.0109, 80.2120], cabs = [] }) {
+export default function MapView({ cabs = [] }) {
   return (
-    <div style={{ height: 400 }}>
-      <MapContainer center={center} zoom={14} style={{ height: "100%" }}>
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {cabs.map((cab) => (
-          <Marker key={cab.id} position={[cab.latitude, cab.longitude]}>
-            <Popup>
-              {cab.cabNumber} <br /> {cab.status} <br /> Updated: {new Date(cab.updatedAt).toLocaleString()}
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-    </div>
+    <MapContainer
+      center={[12.9716, 77.5946]}
+      zoom={12}
+      style={{ width: "100%", height: "350px" }}
+    >
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+      {cabs.map((cab) => (
+        <Marker key={cab.id} position={[cab.lat, cab.lng]} icon={cabIcon}>
+          <Popup>
+            <b>{cab.cabNumber}</b> — {cab.status}
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
 }
