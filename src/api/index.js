@@ -1,5 +1,4 @@
-import axios from "axios";
-
-export const API = axios.create({
-  baseURL: "http://localhost:5000/api",
-});
+export * from "./axiosInstance";
+export * from "./driverApi";
+export * from "./cabApi";
+export * from "./bookingApi";

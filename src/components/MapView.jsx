@@ -7,21 +7,27 @@ const cabIcon = new L.Icon({
 });
 
 export default function MapView({ cabs = [] }) {
-  return (
-    <MapContainer
-      center={[12.9716, 77.5946]}
-      zoom={12}
-      style={{ width: "100%", height: "350px" }}
-    >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+  const center = cabs.length
+    ? [cabs[0].lat, cabs[0].lng]
+    : [13.007, 80.220]; // Chennai area default
 
-      {cabs.map((cab) => (
-        <Marker key={cab.id} position={[cab.lat, cab.lng]} icon={cabIcon}>
-          <Popup>
-            <b>{cab.cabNumber}</b> — {cab.status}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+  return (
+    <div className="card">
+      <MapContainer
+        center={center}
+        zoom={12}
+        style={{ width: "100%", height: 380, borderRadius: 12 }}
+      >
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {cabs.map((cab) => (
+          <Marker key={cab.id} position={[cab.lat, cab.lng]} icon={cabIcon}>
+            <Popup>
+              <b>{cab.cabNumber}</b><br />
+              {cab.status}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 }

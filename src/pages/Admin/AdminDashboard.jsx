@@ -1,44 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { getAllCabs } from "../../api/driverApi.js";
+import { getAllCabs } from "../../api/driverApi";
 import MapView from "../../components/MapView";
 
 export default function AdminDashboard() {
   const [cabs, setCabs] = useState([]);
 
   useEffect(() => {
-    let isMounted = true;
-
+    let active = true;
     async function load() {
       try {
         const res = await getAllCabs();
-        if (isMounted && res?.data?.cabs) {
-          setCabs(res.data.cabs);
-        }
-      } catch (err) {
-        console.error("Failed to fetch cabs:", err);
-      }
+        if (active && res?.data?.cabs) setCabs(res.data.cabs);
+      } catch (e) { /* silent */ }
     }
-
     load();
-
-    const intervalId = setInterval(load, 8000);
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
+    const id = setInterval(load, 8000);
+    return () => { active = false; clearInterval(id); };
   }, []);
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Admin Dashboard — Live Cabs</h2>
+    <div className="container">
+      <h2 className="page-title">Admin Dashboard — Live Cabs</h2>
       <MapView cabs={cabs} />
-      <div style={{ marginTop: 12 }}>
-        {cabs.map((cab) => (
-          <div key={cab.id}>
-            <b>{cab.cabNumber}</b> — {cab.status} — Updated:{" "}
-            {new Date(cab.updatedAt).toLocaleString()}
-          </div>
-        ))}
+      <div className="card" style={{ marginTop: 12 }}>
+        <h3>Active Cabs</h3>
+        <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))" }}>
+          {cabs.map((c) => (
+            <div key={c.id} className="card">
+              <div><b>{c.cabNumber}</b></div>
+              <div>Status: {c.status}</div>
+              <div>Updated: {new Date(c.updatedAt).toLocaleTimeString()}</div>
+            </div>
+          ))}
+          {!cabs.length && <div>No cabs found</div>}
+        </div>
       </div>
     </div>
   );

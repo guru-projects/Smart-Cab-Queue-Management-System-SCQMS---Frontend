@@ -1,8 +1,14 @@
-import api from "./axiosInstance.js";
+import api from "./axiosInstance";
 
+// DRIVER AUTH
 export const driverLogin = (payload) => api.post("/auth/driver/login", payload);
 
-export const updateLocation = (data) => api.post("/cabs/update-location", data);
+// DRIVER CAB
+export const getMyCab = () => api.get("/cabs/my");
+export const updateLocation = (coords) => api.post("/cabs/update-location", coords);
 
-export const getMyCab = () => api.get("/cabs/my"); // optional
-export const getAllCabs = () => api.get("/cabs/all");
+// ADMIN VIEW
+export const getAllCabs = () => api.get("/cabs");
+export function employeeLogin(data) {
+  return api.post("/employee/login", data);
+}
