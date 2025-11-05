@@ -1,25 +1,37 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user") || "null")
-  );
+  const [token, setToken] = useState(() => localStorage.getItem("scqms_token"));
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("scqms_user"));
+    } catch {
+      return null;
+    }
+  });
 
-  function login(tkn, usr) {
-    setToken(tkn);
-    setUser(usr);
-    localStorage.setItem("token", tkn);
-    localStorage.setItem("user", JSON.stringify(usr));
+  useEffect(() => {
+    if (token) localStorage.setItem("scqms_token", token);
+    else localStorage.removeItem("scqms_token");
+  }, [token]);
+
+  useEffect(() => {
+    if (user) localStorage.setItem("scqms_user", JSON.stringify(user));
+    else localStorage.removeItem("scqms_user");
+  }, [user]);
+
+  function login(tokenValue, userObj) {
+    setToken(tokenValue);
+    setUser(userObj);
   }
 
   function logout() {
     setToken(null);
     setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("scqms_token");
+    localStorage.removeItem("scqms_user");
   }
 
   return (

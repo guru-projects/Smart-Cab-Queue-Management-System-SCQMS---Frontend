@@ -1,97 +1,167 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/logo.png";
-import "./EmployeeLogin.css";
-import { sendEmpOtp, employeeLogin } from "../../api/employeeApi";
+import "./EmployeeLogin.css"; // keep or update your css
 
-export default function EmployeeLogin() {
-  const [employeeId, setEmployeeId] = useState("");
+// mock employees
+const TEST_EMPLOYEES = [
+  { empId: "EMP001", mobile: "9876501234", password: "emp@123", name: "Arun Prakash" },
+  { empId: "EMP002", mobile: "9876505678", password: "emp@123", name: "Maya Rao" }
+];
+
+// mock OTP store (for demo) — in real app you send SMS
+const MOCK_OTP = { "9876501234": "123456", "9876505678": "123456" };
+
+export default function Login() {
+  const [mode, setMode] = useState("password"); // 'password' or 'otp'
+  const [empId, setEmpId] = useState("");
   const [password, setPassword] = useState("");
   const [mobile, setMobile] = useState("");
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  async function loginWithPassword(e) {
+  async function submitPassword(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
-      const res = await employeeLogin({ employeeId, password });
-      localStorage.setItem("token", res.data.token);
+      const found = TEST_EMPLOYEES.find(
+        (u) => u.empId === empId && u.password === password
+      );
+
+      if (!found) {
+        setError("Invalid Employee ID or password (see test creds below)");
+        setLoading(false);
+        return;
+      }
+
+      login(`emp-token-${found.empId}`, { role: "employee", id: found.empId, name: found.name });
       navigate("/employee/dashboard");
     } catch (err) {
-      setError("Invalid employee ID or password");
+      setError("Login failed");
     } finally {
       setLoading(false);
     }
   }
 
-  async function requestOtp(e) {
+  async function sendOtpMock() {
+    setError("");
+    const emp = TEST_EMPLOYEES.find((u) => u.mobile === mobile);
+    if (!emp) {
+      setError("No employee with that mobile (see test creds below)");
+      return;
+    }
+    // In production you would call an API to send OTP
+    alert(`(Mock) Sending OTP ${MOCK_OTP[mobile]} to ${mobile} — use it to login`);
+  }
+
+  async function submitOtp(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
-      await sendEmpOtp({ mobile });
-      navigate("/employee/verify-otp?mobile=" + mobile);
+      if (!MOCK_OTP[mobile] || MOCK_OTP[mobile] !== otp) {
+        setError("Invalid OTP");
+        setLoading(false);
+        return;
+      }
+      const found = TEST_EMPLOYEES.find((u) => u.mobile === mobile);
+      if (!found) {
+        setError("No employee found");
+        setLoading(false);
+        return;
+      }
+
+      login(`emp-token-${found.empId}`, { role: "employee", id: found.empId, name: found.name });
+      navigate("/employee/dashboard");
     } catch (err) {
-      setError("Mobile number not registered");
+      setError("OTP login failed");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="emp-login-page">
-      <div className="emp-login-card">
-        <img src={logo} className="emp-login-logo" alt="SCQMS logo" />
-        <h2 className="emp-login-title">Employee Login</h2>
-
-        {/* Login via Password */}
-        <form className="emp-login-form" onSubmit={loginWithPassword}>
-          <label>Employee ID</label>
-          <input
-            className="emp-input"
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
-          />
-
-          <label>Password</label>
-          <input
-            className="emp-input"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <button className="emp-btn" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-
-        <div style={{ textAlign: "center", margin: "12px 0", opacity: 0.7 }}>
-          OR
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-head">
+          <img src={logo} alt="SCQMS" className="login-logo" />
+          <div className="login-title">Employee Login</div>
         </div>
 
-        {/* Login via OTP */}
-        <form className="emp-login-form" onSubmit={requestOtp}>
-          <label>Mobile Number</label>
-          <input
-            className="emp-input"
-            maxLength="10"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
-          />
-          <button className="emp-btn" disabled={loading}>
-            Get OTP
+        {/* toggle */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+          <button
+            className={`btn ${mode === "password" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setMode("password")}
+          >
+            Password
           </button>
-        </form>
+          <button
+            className={`btn ${mode === "otp" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setMode("otp")}
+          >
+            Mobile + OTP
+          </button>
+        </div>
 
-        {error && <p style={{ color: "red", marginTop: 8 }}>{error}</p>}
+        {mode === "password" ? (
+          <form className="login-form" onSubmit={submitPassword}>
+            <div className="field">
+              <label>Employee ID</label>
+              <input className="input" value={empId} onChange={(e) => setEmpId(e.target.value)} required />
+            </div>
 
-        <p className="emp-helper">
-          New Employee? <a onClick={() => navigate("/employee/signup")}>Sign up</a>
+            <div className="field">
+              <label>Password</label>
+              <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            </div>
+
+            {error && <div className="help-error">{error}</div>}
+
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? "Logging in…" : "Login"}
+            </button>
+          </form>
+        ) : (
+          <form className="login-form" onSubmit={submitOtp}>
+            <div className="field">
+              <label>Mobile Number</label>
+              <input className="input" value={mobile} onChange={(e) => setMobile(e.target.value)} required />
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+              <button type="button" className="btn-primary" onClick={sendOtpMock}>Send OTP</button>
+              <input className="input" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            </div>
+
+            {error && <div className="help-error">{error}</div>}
+
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? "Verifying…" : "Verify & Login"}
+            </button>
+          </form>
+        )}
+
+        <div className="helper" style={{ marginTop: 12 }}>
+          <span>Test (password):</span>
+          <b>EMP001 / emp@123</b>
+        </div>
+
+        <div className="helper" style={{ marginTop: 6 }}>
+          <span>Test (OTP):</span>
+          <b>Mobile 9876501234 — OTP 123456</b>
+        </div>
+
+        <p style={{ textAlign: "center", marginTop: 12 }}>
+          New employee? <Link to="/employee/signup" className="link-text">Register here</Link>
         </p>
       </div>
     </div>

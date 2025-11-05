@@ -1,15 +1,20 @@
 import React, { useState } from "react";
-import { driverLogin } from "../../api/driverApi";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";   // ✅ Added Link
 import logo from "../../assets/logo.png";
-import "./DriverLogin.css";
+import "../Driver/DriverLogin.css"; // keep your styles
+
+// test credentials
+const TEST_DRIVERS = [
+  { username: "driver01", password: "password123", name: "Ravi Kumar", id: "DRV001", phone: "9876543210" },
+  { username: "driver02", password: "password123", name: "Sekar", id: "DRV002", phone: "9876543211" }
+];
 
 export default function DriverLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -17,14 +22,31 @@ export default function DriverLogin() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
-      const res = await driverLogin({ username, password });
-      const { token, user } = res.data;
+      // mock auth: find a matching driver
+      const found = TEST_DRIVERS.find(
+        (d) => d.username === username && d.password === password
+      );
+
+      if (!found) {
+        setError("Invalid username or password (use test credentials shown below)");
+        setLoading(false);
+        return;
+      }
+
+      // create a dummy token and user object
+      const token = `driver-token-${found.id}`;
+      const user = { role: "driver", id: found.id, name: found.name, username: found.username };
+
+      // call auth context
       login(token, user);
+
+      // redirect to driver dashboard
       navigate("/driver/dashboard");
     } catch (err) {
-      setError(err?.response?.data?.message || "Invalid credentials");
       console.error(err);
+      setError("Login failed");
     } finally {
       setLoading(false);
     }
@@ -40,27 +62,25 @@ export default function DriverLogin() {
 
         <form className="login-form" onSubmit={submit}>
           <div className="field">
-            <label htmlFor="username">Username</label>
+            <label>Username</label>
             <input
-              id="username"
               className={`input ${error ? "error" : ""}`}
-              placeholder="Enter username"
               value={username}
-              onChange={(e)=>setUsername(e.target.value)}
-              autoComplete="username"
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
+              required
             />
           </div>
 
           <div className="field">
-            <label htmlFor="password">Password</label>
+            <label>Password</label>
             <input
-              id="password"
               className={`input ${error ? "error" : ""}`}
               type="password"
-              placeholder="Enter password"
               value={password}
-              onChange={(e)=>setPassword(e.target.value)}
-              autoComplete="current-password"
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              required
             />
             {error && <div className="help-error">{error}</div>}
           </div>
@@ -72,18 +92,17 @@ export default function DriverLogin() {
           </div>
         </form>
 
-        {/* ✅ ADD SIGNUP LINK BELOW LOGIN */}
-        <p style={{ textAlign: "center", marginTop: "14px" }}>
-          {" "}
-          <Link to="/driver/signup" className="link-text">
-            Register here
-          </Link>
-        </p>
+        <div className="helper">
+          <span>Test drivers:</span>
+          <div style={{ textAlign: "right" }}>
+            <div><b>driver01</b> / password123</div>
+            <div><b>driver02</b> / password123</div>
+          </div>
+        </div>
 
-        {/* <div className="helper">
-          <span>Test:</span>
-          <b>driver01 / password123</b>
-        </div> */}
+        <p style={{ textAlign: "center", marginTop: 12 }}>
+          New driver? <Link to="/driver/signup" className="link-text">Register here</Link>
+        </p>
       </div>
     </div>
   );

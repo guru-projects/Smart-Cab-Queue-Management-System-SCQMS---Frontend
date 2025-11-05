@@ -1,39 +1,64 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FaBars, FaUser, FaTachometerAlt, FaCar, FaHistory, FaQrcode, FaSignOutAlt } from "react-icons/fa";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
 import "./Sidebar.css";
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(true);
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) return null; // hide sidebar if not logged in
+
+  const active = (path) => location.pathname === path ? "active-link" : "";
+
+  function handleLogout() {
+    logout();
+    navigate("/");
+  }
 
   return (
-    <div className={`sidebar-container ${open ? "open" : "closed"}`}>
-
+    <aside className="sidebar">
       <div className="sidebar-header">
-        <button className="menu-btn" onClick={() => setOpen(!open)}>
-          <FaBars size={22} />
-        </button>
-
-        {open && (
-          <div className="sidebar-logo">
-            <img src={logo} alt="SCQMS" />
-            <h3>SCQMS Portal</h3>
-          </div>
-        )}
+        <img src={logo} alt="logo" className="sidebar-logo" />
+        <h3>SCQMS</h3>
+        <p className="role-tag">{user.role?.toUpperCase()}</p>
       </div>
 
-      <ul className="sidebar-menu">
+      <nav className="sidebar-menu">
 
-        <li><Link to="/driver/dashboard"><FaTachometerAlt /> {open && "Dashboard"}</Link></li>
-        <li><Link to="/employee/queue"><FaUser /> {open && "Queue Status"}</Link></li>
-        <li><Link to="/employee/history"><FaHistory /> {open && "Booking History"}</Link></li>
-        <li><Link to="/employee/qr"><FaQrcode /> {open && "QR Scan Booking"}</Link></li>
-        <li><Link to="/admin/cabs"><FaCar /> {open && "Cabs Management"}</Link></li>
-        <li><Link to="/admin/dashboard"><FaTachometerAlt /> {open && "Admin Panel"}</Link></li>
+        {/* ================= EMPLOYEE MENU ================= */}
+        {user.role === "employee" && (
+          <>
+            <Link className={active("/employee/dashboard")} to="/employee/dashboard">🏠 Dashboard</Link>
+            <Link className={active("/employee/history")} to="/employee/history">🧾 Booking History</Link>
+            <Link className={active("/employee/queue")} to="/employee/queue">📊 Queue Status</Link>
+            <Link className={active("/employee/qr")} to="/employee/qr">📷 QR Booking</Link>
+          </>
+        )}
 
-        <li className="logout"><Link to="/driver/login"><FaSignOutAlt /> {open && "Logout"}</Link></li>
-      </ul>
-    </div>
+        {/* ================= DRIVER MENU ================= */}
+        {user.role === "driver" && (
+          <>
+            <Link className={active("/driver/dashboard")} to="/driver/dashboard">🚕 Driver Dashboard</Link>
+          </>
+        )}
+
+        {/* ================= ADMIN MENU ================= */}
+        {user.role === "admin" && (
+          <>
+            <Link className={active("/admin/dashboard")} to="/admin/dashboard">📍 Live Cab Map</Link>
+            <Link className={active("/admin/cabs")} to="/admin/cabs">🚗 Cab Management</Link>
+            <Link className={active("/admin/analytics")} to="/admin/analytics">📊 Analytics</Link>
+          </>
+        )}
+      </nav>
+
+      <div className="sidebar-footer">
+        <button className="logout-btn" onClick={handleLogout}>
+          🚪 Logout
+        </button>
+      </div>
+    </aside>
   );
 }

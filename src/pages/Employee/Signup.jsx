@@ -1,123 +1,107 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "../Employee/auth.css"; // <-- same CSS as login page
+import { useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.png";
+import "./auth.css"; // same UI as login
 
 export default function Signup() {
+  const [empId, setEmpId] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    fullName: "",
-    empId: "",
-    email: "",
-    mobile: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const submit = async (e) => {
+  async function handleSignup(e) {
     e.preventDefault();
+    setError("");
 
-    if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match!");
+    if (password !== confirmPass) {
+      setError("Passwords do not match");
       return;
     }
 
+    setLoading(true);
     try {
-      // API call here
-      // await axios.post("/api/employee/signup", form);
+      // TODO: Replace API later
+      console.log("New Employee -> ", { empId, mobile, password });
 
-      alert("✅ Signup successful! Please login.");
+      alert("Signup successful ✅");
       navigate("/employee/login");
+
     } catch (err) {
-      alert(err?.response?.data?.message || "Signup failed");
+      setError("Signup failed, try again");
     }
-  };
+    setLoading(false);
+  }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2>Create Employee Account</h2>
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-head">
+          <img src={logo} alt="SCQMS" className="login-logo" />
+          <div className="login-title">Employee Signup</div>
+        </div>
 
-        <form onSubmit={submit}>
-          <div className="input-group">
-            <label>Full Name</label>
-            <input
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
-              placeholder="John Doe"
-              required
-            />
-          </div>
-
-          <div className="input-group">
+        <form className="login-form" onSubmit={handleSignup}>
+          <div className="field">
             <label>Employee ID</label>
             <input
-              name="empId"
-              value={form.empId}
-              onChange={handleChange}
-              placeholder="EMP12345"
+              className="input"
+              placeholder="Enter Employee ID"
+              value={empId}
+              onChange={(e) => setEmpId(e.target.value)}
               required
             />
           </div>
 
-          <div className="input-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="example@company.com"
-              required
-            />
-          </div>
-
-          <div className="input-group">
+          <div className="field">
             <label>Mobile Number</label>
             <input
-              type="tel"
-              name="mobile"
-              value={form.mobile}
-              onChange={handleChange}
-              placeholder="9876543210"
-              pattern="[0-9]{10}"
+              className="input"
+              placeholder="Enter mobile number"
+              maxLength={10}
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
               required
             />
           </div>
 
-          <div className="input-group">
+          <div className="field">
             <label>Password</label>
             <input
               type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
+              className="input"
+              placeholder="Create password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
 
-          <div className="input-group">
+          <div className="field">
             <label>Confirm Password</label>
             <input
               type="password"
-              name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={handleChange}
+              className="input"
+              placeholder="Re-enter password"
+              value={confirmPass}
+              onChange={(e) => setConfirmPass(e.target.value)}
               required
             />
           </div>
 
-          <button type="submit" className="auth-btn">Sign Up</button>
+          {error && <div className="help-error">{error}</div>}
+
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "Creating..." : "Signup"}
+          </button>
         </form>
 
-        <p>
-          Already registered?{" "}
-          <Link to="/employee/login" className="link-text">Login</Link>
+        <p style={{ textAlign: "center", marginTop: "10px" }}>
+          Already have an account?
+          <a href="/employee/login" className="link-text"> Login here</a>
         </p>
       </div>
     </div>

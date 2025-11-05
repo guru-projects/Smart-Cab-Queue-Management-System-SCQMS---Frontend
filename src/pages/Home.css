@@ -1,0 +1,93 @@
+.home-bg {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at 20% 30%, rgba(80,120,255,0.3), transparent),
+              radial-gradient(circle at 80% 80%, rgba(255,60,150,0.25), transparent),
+              #0b1020;
+}
+
+.home-card {
+  width: 380px;
+  padding: 28px;
+  text-align: center;
+  background: rgba(15,18,40,0.6);
+  border: 1px solid rgba(100,120,255,0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  animation: fadeIn 0.6s ease, float 5s ease-in-out infinite;
+}
+
+.home-logo {
+  width: 70px;
+  margin-bottom: 10px;
+}
+
+.home-title {
+  font-size: 1.6rem;
+  color: #e8edff;
+  font-weight: 700;
+}
+
+.home-sub {
+  color: #a7b4ea;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+}
+
+.btn-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.home-btn {
+  text-decoration: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #fff;
+  display: block;
+  transition: transform .1s ease, box-shadow .2s ease;
+}
+
+.home-btn.emp {
+  background: linear-gradient(135deg,#4f86ff,#3c66ee);
+}
+
+.home-btn.driver {
+  background: linear-gradient(135deg,#28c76f,#1f9d57);
+}
+
+.home-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(60,120,255,0.35);
+}
+
+.admin-link {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: #9bb0ff;
+}
+
+.admin-link a {
+  color: #5fa8ff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-link a:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(-4px); }
+  50% { transform: translateY(4px); }
+}

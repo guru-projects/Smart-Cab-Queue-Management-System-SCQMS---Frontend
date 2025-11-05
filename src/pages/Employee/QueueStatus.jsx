@@ -1,23 +1,58 @@
-import { useQueue } from "../../context/QueueContext";
+import { getDistanceMeters } from "../../utils/distanceCheck";
+import { useState } from "react";
 
 export default function QueueStatus() {
-  const { queue } = useQueue();
+  const [error, setError] = useState("");
+
+  const guindy = { lat: 13.0108, lon: 80.2170 }; // ✅ Geo-fence center
+  const allowedRadius = 250; // meters
+
+  async function checkGeoAndBook() {
+    setError("");
+
+    if (!navigator.geolocation) {
+      setError("Location services not available");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+
+        const distance = getDistanceMeters(
+          latitude,
+          longitude,
+          guindy.lat,
+          guindy.lon
+        );
+
+        console.log("Distance from Guindy:", distance, "meters");
+
+        if (distance <= allowedRadius) {
+          // ✅ Within 250m — allow booking
+          alert("✅ Location verified. Booking allowed!");
+
+          // 🔥 call your booking API here
+          // await bookCab();
+        } else {
+          setError(
+            "❌ You must be within 250 meters of Guindy Railway Station to book a cab."
+          );
+        }
+      },
+      () => setError("Enable GPS to proceed")
+    );
+  }
+
   return (
-    <div className="container">
-      <h2 className="page-title">Queue Status</h2>
-      <div className="card">
-        Waiting: <b>{queue.length}</b>
-      </div>
-      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))", marginTop: 12 }}>
-        {queue.map((q, i) => (
-          <div key={q.id || i} className="card">
-            <div><b>{q.employeeName}</b></div>
-            <div>Arrived: {new Date(q.arrivedAt).toLocaleTimeString()}</div>
-            <div>Priority: {q.priority ?? i + 1}</div>
-          </div>
-        ))}
-        {!queue.length && <div className="card">Queue is currently empty.</div>}
-      </div>
+    <div>
+      <button onClick={checkGeoAndBook} className="btn-primary">
+        Book Cab
+      </button>
+
+      {error && (
+        <p style={{ marginTop: 12, color: "red", fontWeight: 600 }}>{error}</p>
+      )}
     </div>
   );
 }

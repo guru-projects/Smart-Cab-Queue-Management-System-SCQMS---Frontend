@@ -1,12 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { QueueProvider } from "./context/QueueContext";
 
-// Sidebar UI
+/* Components */
 import Sidebar from "./components/Sidebar";
-
-// Footer
 import Footer from "./components/Footer";
+
+/* Home */
+import Home from "./pages/Home";
 
 /* Driver Pages */
 import DriverLogin from "./pages/Driver/DriverLogin";
@@ -32,7 +33,113 @@ import "./App.css";
 
 function Protected({ children }) {
   const { token } = useAuth();
-  return token ? children : <Navigate to="/driver/login" replace />;
+  return token ? children : <Navigate to="/" replace />;
+}
+
+function AppLayout() {
+  const location = useLocation();
+  const hideSidebarRoutes = [
+    "/",
+    "/employee/login", "/employee/signup", "/employee/verify-otp",
+    "/driver/login", "/driver/signup",
+    "/admin/login"
+  ];
+
+  const hideSidebar = hideSidebarRoutes.includes(location.pathname);
+
+  return (
+    <>
+      {/* Sidebar visible only after login */}
+      {!hideSidebar && <Sidebar />}
+
+      <div style={{ marginLeft: !hideSidebar ? "220px" : "0", padding: "15px" }}>
+        <Routes>
+
+          {/* HOME */}
+          <Route path="/" element={<Home />} />
+
+          {/* DRIVER */}
+          <Route path="/driver/login" element={<DriverLogin />} />
+          <Route path="/driver/signup" element={<DriverSignup />} />
+          <Route
+            path="/driver/dashboard"
+            element={
+              <Protected>
+                <DriverDashboard />
+              </Protected>
+            }
+          />
+
+          {/* EMPLOYEE */}
+          <Route path="/employee/login" element={<EmpLogin />} />
+          <Route path="/employee/signup" element={<EmpSignup />} />
+          <Route path="/employee/verify-otp" element={<OtpVerify />} />
+
+          <Route
+            path="/employee/dashboard"
+            element={
+              <Protected>
+                <EmpDashboard />
+              </Protected>
+            }
+          />
+          <Route
+            path="/employee/history"
+            element={
+              <Protected>
+                <BookingHistory />
+              </Protected>
+            }
+          />
+          <Route
+            path="/employee/qr"
+            element={
+              <Protected>
+                <QRBooking />
+              </Protected>
+            }
+          />
+          <Route
+            path="/employee/queue"
+            element={
+              <Protected>
+                <QueueStatus />
+              </Protected>
+            }
+          />
+
+          {/* ADMIN */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <Protected>
+                <AdminDashboard />
+              </Protected>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <Protected>
+                <Analytics />
+              </Protected>
+            }
+          />
+          <Route
+            path="/admin/cabs"
+            element={
+              <Protected>
+                <Cabs />
+              </Protected>
+            }
+          />
+        </Routes>
+
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default function App() {
@@ -40,98 +147,7 @@ export default function App() {
     <AuthProvider>
       <QueueProvider>
         <BrowserRouter>
-
-          {/* Sidebar */}
-          <Sidebar />
-
-          {/* All content shifted right so sidebar visible */}
-          <div style={{ marginLeft: "220px", padding: "15px" }}>
-
-            <Routes>
-              {/* Default */}
-              <Route path="/" element={<Navigate to="/driver/login" />} />
-
-              {/* DRIVER */}
-              <Route path="/driver/login" element={<DriverLogin />} />
-              <Route path="/driver/signup" element={<DriverSignup />} />
-              <Route
-                path="/driver/dashboard"
-                element={
-                  <Protected>
-                    <DriverDashboard />
-                  </Protected>
-                }
-              />
-
-              {/* EMPLOYEE */}
-              <Route path="/employee/login" element={<EmpLogin />} />
-              <Route path="/employee/verify-otp" element={<OtpVerify />} />
-              <Route path="/employee/signup" element={<EmpSignup />} />
-
-              <Route
-                path="/employee/dashboard"
-                element={
-                  <Protected>
-                    <EmpDashboard />
-                  </Protected>
-                }
-              />
-              <Route
-                path="/employee/history"
-                element={
-                  <Protected>
-                    <BookingHistory />
-                  </Protected>
-                }
-              />
-              <Route
-                path="/employee/qr"
-                element={
-                  <Protected>
-                    <QRBooking />
-                  </Protected>
-                }
-              />
-              <Route
-                path="/employee/queue"
-                element={
-                  <Protected>
-                    <QueueStatus />
-                  </Protected>
-                }
-              />
-
-              {/* ADMIN */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <Protected>
-                    <AdminDashboard />
-                  </Protected>
-                }
-              />
-              <Route
-                path="/admin/analytics"
-                element={
-                  <Protected>
-                    <Analytics />
-                  </Protected>
-                }
-              />
-              <Route
-                path="/admin/cabs"
-                element={
-                  <Protected>
-                    <Cabs />
-                  </Protected>
-                }
-              />
-            </Routes>
-
-            <Footer />
-
-          </div>
+          <AppLayout />
         </BrowserRouter>
       </QueueProvider>
     </AuthProvider>
