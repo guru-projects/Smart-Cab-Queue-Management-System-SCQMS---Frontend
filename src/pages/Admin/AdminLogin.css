@@ -1,0 +1,89 @@
+.admin-page {
+  min-height: calc(100vh - 120px);
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(1200px 600px at 10% -20%, rgba(79,134,255,.20), transparent 60%),
+    radial-gradient(900px 500px at 90% 120%, rgba(113,80,255,.18), transparent 60%);
+}
+
+.admin-card {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(18, 25, 57, 0.7);
+  border: 1px solid rgba(90,120,250,0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  padding: 28px;
+  animation: fade .4s ease;
+  box-shadow: 0 12px 40px rgba(0,0,0,.35);
+}
+
+.admin-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.admin-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+}
+
+.admin-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.admin-form {
+  display: grid;
+  gap: 14px;
+}
+
+.field label {
+  color: #a6b0d8;
+  font-size: .92rem;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #0f1736;
+  border: 1px solid rgba(120,140,220,.25);
+  color: white;
+}
+
+.input:focus {
+  border-color: #4f86ff;
+  box-shadow: 0 0 0 3px rgba(79,134,255,.25);
+}
+
+.help-error {
+  color: #ef476f;
+  font-size: .85rem;
+}
+
+.btn-primary {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #4f86ff;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+
+.helper {
+  margin-top: 8px;
+  font-size: .9rem;
+  color: #a6b0d8;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
