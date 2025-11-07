@@ -1,10 +1,17 @@
 import api from "./axiosInstance";
 
 // Employee booking
-export const createBooking = (payload) => api.post("/bookings", payload);
-export const myBookings = () => api.get("/bookings/me");
-export const cancelBooking = (id) => api.delete(`/bookings/${id}`);
+export const createBooking = (employeeId) =>
+  api.post(`/api/bookings/create/${employeeId}`);
+
+export const myBookings = (employeeId) =>
+  api.get(`/api/bookings/employee/${employeeId}`);
+
+export const cancelBooking = (id) =>
+  api.put(`/api/bookings/complete/${id}`); // Marks booking complete
 
 // Admin queue
-export const queueStatus = () => api.get("/queue/status");
-export const requestMoreCabs = (count) => api.post("/queue/request-cabs", { count });
+export const queueStatus = () => api.get("/api/bookings/all");
+
+export const requestMoreCabs = () =>
+  api.post("/api/bookings/assign-next"); // Assign queued bookings

@@ -1,14 +1,11 @@
 import api from "./axiosInstance";
 
-// DRIVER AUTH
-export const driverLogin = (payload) => api.post("/auth/driver/login", payload);
+// DRIVER LOGIN
+export const driverLogin = (payload) => api.post("/auth/login", payload);
 
 // DRIVER CAB
-export const getMyCab = () => api.get("/cabs/my");
-export const updateLocation = (coords) => api.post("/cabs/update-location", coords);
+export const updateLocation = (id, coords) =>
+  api.put(`/cab/update-location/${id}?latitude=${coords.latitude}&longitude=${coords.longitude}`);
 
-// ADMIN VIEW
-export const getAllCabs = () => api.get("/cabs");
-export function employeeLogin(data) {
-  return api.post("/employee/login", data);
-}
+// Optional: if driver dashboard shows all cabs
+export const getAllCabs = () => api.get("/cab/all");

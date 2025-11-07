@@ -1,5 +1,9 @@
 import api from "./axiosInstance";
 
-export const listCabs = () => api.get("/cabs");
-export const createCab = (payload) => api.post("/cabs", payload);
-export const setCabStatus = (id, status) => api.patch(`/cabs/${id}/status`, { status });
+export const listCabs = () => api.get("/cab/all");
+
+export const setCabStatus = (id, status) =>
+  api.put(`/cab/update-status/${id}?status=${status}`);
+
+export const updateCabLocation = (id, latitude, longitude) =>
+  api.put(`/cab/update-location/${id}?latitude=${latitude}&longitude=${longitude}`);
