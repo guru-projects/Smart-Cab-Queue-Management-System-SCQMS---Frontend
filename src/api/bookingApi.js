@@ -1,17 +1,17 @@
+// src/api/bookingApi.js
 import api from "./axiosInstance";
 
-// Employee booking
 export const createBooking = (employeeId) =>
   api.post(`/api/bookings/create/${employeeId}`);
 
-export const myBookings = (employeeId) =>
+export const getAllBookings = () =>
+  api.get("/api/bookings/all");
+
+export const getBookingsByEmployee = (employeeId) =>
   api.get(`/api/bookings/employee/${employeeId}`);
 
-export const cancelBooking = (id) =>
-  api.put(`/api/bookings/complete/${id}`); // Marks booking complete
+export const assignNext = () =>
+  api.post("/api/bookings/assign-next");
 
-// Admin queue
-export const queueStatus = () => api.get("/api/bookings/all");
-
-export const requestMoreCabs = () =>
-  api.post("/api/bookings/assign-next"); // Assign queued bookings
+export const completeBooking = (bookingId) =>
+  api.put(`/api/bookings/complete/${bookingId}`);

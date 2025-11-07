@@ -1,4 +1,8 @@
 import api from "./axiosInstance";
 
-export const registerEmployee = (data) => api.post("/auth/register", data);
-export const employeeLogin = (data) => api.post("/auth/login", data);
+// ✅ Employee Auth APIs
+import { loginUser, registerUser } from "./authApi";
+
+// ✅ Optional: OTP APIs (if supported by backend)
+export const sendEmpOtp = (data) => api.post("/auth/send-otp", data);
+export const verifyEmpOtp = (data) => api.post("/auth/verify-otp", data);

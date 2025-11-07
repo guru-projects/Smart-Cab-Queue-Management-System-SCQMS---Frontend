@@ -1,36 +1,32 @@
 import React, { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { verifyEmpOtp } from "../../api/employeeApi";
-import logo from "../../assets/logo.png";
 
 export default function OtpVerify() {
   const [otp, setOtp] = useState("");
-  const [search] = useSearchParams();
-  const mobile = search.get("mobile");
-  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
 
-  async function submit(e) {
-    e.preventDefault();
-    const res = await verifyEmpOtp({ mobile, otp });
-    localStorage.setItem("token", res.data.token);
-    navigate("/employee/dashboard");
-  }
+  const handleVerify = async () => {
+    try {
+      const res = await verifyEmpOtp({ otp });
+      setMessage("✅ OTP verified successfully!");
+      console.log(res.data);
+    } catch (err) {
+      setMessage("❌ Invalid OTP. Please try again.");
+      console.error(err);
+    }
+  };
 
   return (
-    <div className="emp-login-page">
-      <div className="emp-login-card">
-        <img src={logo} className="emp-login-logo" />
-        <h2>Verify OTP</h2>
-        <form onSubmit={submit}>
-          <input
-            className="emp-input"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter OTP"
-          />
-          <button className="emp-btn">Verify</button>
-        </form>
-      </div>
+    <div className="container">
+      <h2>Verify OTP</h2>
+      <input
+        type="text"
+        placeholder="Enter OTP"
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+      />
+      <button onClick={handleVerify}>Verify</button>
+      {message && <p>{message}</p>}
     </div>
   );
 }

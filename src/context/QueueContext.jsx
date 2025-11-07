@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { queueStatus } from "../api/bookingApi";
+import { getAllBookings as queueStatus } from "../api/bookingApi";
 
 const QueueContext = createContext();
 

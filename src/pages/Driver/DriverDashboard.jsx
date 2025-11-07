@@ -1,39 +1,86 @@
 import React, { useEffect, useState } from "react";
-import { getMyCab } from "../../api/driverApi";
+import { getMyCab, updateLocation } from "../../api/driverApi";
 import LocationButton from "../../components/LocationButton";
 
 export default function DriverDashboard() {
   const [cab, setCab] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const username = localStorage.getItem("username"); // saved at login
 
   useEffect(() => {
     let active = true;
-    async function load() {
+
+    async function loadCab() {
       try {
-        const res = await getMyCab();
-        if (active) setCab(res?.data?.cab || null);
-      } catch {}
+        if (!username) return;
+        const res = await getMyCab(username);
+        if (active) {
+          setCab(res?.data || null);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to load cab:", err);
+        setLoading(false);
+      }
     }
-    load();
-    const id = setInterval(load, 8000);
-    return () => { active = false; clearInterval(id); };
-  }, []);
+
+    loadCab();
+    const intervalId = setInterval(loadCab, 8000); // auto refresh every 8 sec
+
+    return () => {
+      active = false;
+      clearInterval(intervalId);
+    };
+  }, [username]);
+
+  const handleLocationUpdate = async () => {
+    if (!cab) return alert("No cab assigned yet!");
+    if (!navigator.geolocation) {
+      alert("Geolocation not supported");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const coords = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        };
+        await updateLocation(cab.id, coords);
+        alert("Location updated successfully!");
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update location");
+      }
+    });
+  };
+
+  if (loading) return <div className="container">Loading...</div>;
 
   return (
     <div className="container">
       <h2 className="page-title">Driver Dashboard</h2>
-      <div className="card" style={{ maxWidth: 520 }}>
+
+      <div className="card" style={{ maxWidth: 520, padding: 16 }}>
         {cab ? (
           <>
-            <div><b>Cab:</b> {cab.cabNumber}</div>
+            <div><b>Cab Number:</b> {cab.cabNumber}</div>
+            <div><b>Driver Name:</b> {cab.driverName}</div>
             <div><b>Status:</b> {cab.status}</div>
-            <div><b>Last Update:</b> {cab.updatedAt ? new Date(cab.updatedAt).toLocaleString() : "-"}</div>
+            <div>
+              <b>Last Updated:</b>{" "}
+              {cab.lastUpdated
+                ? new Date(cab.lastUpdated).toLocaleString()
+                : "-"}
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <button className="btn btn-primary" onClick={handleLocationUpdate}>
+                Update My Location
+              </button>
+            </div>
           </>
         ) : (
-          <div>No cab assigned.</div>
+          <div>No cab assigned for driver: <b>{username}</b></div>
         )}
-        <div style={{ marginTop: 12 }}>
-          <LocationButton />
-        </div>
       </div>
     </div>
   );

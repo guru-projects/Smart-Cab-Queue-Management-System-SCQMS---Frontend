@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { myBookings, cancelBooking } from "../../api/bookingApi";
 
 export default function BookingHistory() {
   const [items, setItems] = useState([]);
