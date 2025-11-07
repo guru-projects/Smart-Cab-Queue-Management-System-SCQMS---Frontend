@@ -1,39 +1,43 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import "./auth.css"; // same UI as login
+import "./auth.css"; // same CSS used for login & signup pages
 
-export default function Signup() {
-  const [empId, setEmpId] = useState("");
-  const [mobile, setMobile] = useState("");
+export default function EmpSignup() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleSignup(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setSuccess("");
+    setLoading(true);
 
-    if (password !== confirmPass) {
+    if (password !== confirmPassword) {
       setError("Passwords do not match");
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
     try {
-      // TODO: Replace API later
-      console.log("New Employee -> ", { empId, mobile, password });
+      // ✅ Mock signup logic — in real app you’d call your /auth/register API
+      const userData = { name, email, password };
+      console.log("Registered Employee:", userData);
 
-      alert("Signup successful ✅");
-      navigate("/employee/login");
-
+      setSuccess("Signup successful! Redirecting to login...");
+      setTimeout(() => navigate("/employee/login"), 1800);
     } catch (err) {
-      setError("Signup failed, try again");
+      console.error(err);
+      setError("Signup failed. Try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -44,26 +48,27 @@ export default function Signup() {
           <div className="login-title">Employee Signup</div>
         </div>
 
-        <form className="login-form" onSubmit={handleSignup}>
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="field">
-            <label>Employee ID</label>
+            <label>Full Name</label>
             <input
               className="input"
-              placeholder="Enter Employee ID"
-              value={empId}
-              onChange={(e) => setEmpId(e.target.value)}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your full name"
               required
             />
           </div>
 
           <div className="field">
-            <label>Mobile Number</label>
+            <label>Email</label>
             <input
               className="input"
-              placeholder="Enter mobile number"
-              maxLength={10}
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your company email"
               required
             />
           </div>
@@ -71,11 +76,11 @@ export default function Signup() {
           <div className="field">
             <label>Password</label>
             <input
-              type="password"
               className="input"
-              placeholder="Create password"
+              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
               required
             />
           </div>
@@ -83,25 +88,30 @@ export default function Signup() {
           <div className="field">
             <label>Confirm Password</label>
             <input
-              type="password"
               className="input"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter password"
-              value={confirmPass}
-              onChange={(e) => setConfirmPass(e.target.value)}
               required
             />
           </div>
 
           {error && <div className="help-error">{error}</div>}
+          {success && <div className="help-success">{success}</div>}
 
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? "Creating..." : "Signup"}
-          </button>
+          <div className="actions">
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? "Registering…" : "Signup"}
+            </button>
+          </div>
         </form>
 
-        <p style={{ textAlign: "center", marginTop: "10px" }}>
-          Already have an account?
-          <a href="/employee/login" className="link-text"> Login here</a>
+        <p style={{ textAlign: "center", marginTop: "12px" }}>
+          Already have an account?{" "}
+          <Link to="/employee/login" className="link-text">
+            Login here
+          </Link>
         </p>
       </div>
     </div>

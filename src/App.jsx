@@ -16,7 +16,6 @@ import DriverDashboard from "./pages/Driver/DriverDashboard";
 
 /* Employee Pages */
 import EmpLogin from "./pages/Employee/Login";
-import OtpVerify from "./pages/Employee/OtpVerify";
 import EmpSignup from "./pages/Employee/Signup";
 import EmpDashboard from "./pages/Employee/DashBoard";
 import BookingHistory from "./pages/Employee/BookingHistory";
@@ -40,7 +39,7 @@ function AppLayout() {
   const location = useLocation();
   const hideSidebarRoutes = [
     "/",
-    "/employee/login", "/employee/signup", "/employee/verify-otp",
+    "/employee/login", "/employee/signup",
     "/driver/login", "/driver/signup",
     "/admin/login"
   ];
@@ -73,7 +72,6 @@ function AppLayout() {
           {/* EMPLOYEE */}
           <Route path="/employee/login" element={<EmpLogin />} />
           <Route path="/employee/signup" element={<EmpSignup />} />
-          <Route path="/employee/verify-otp" element={<OtpVerify />} />
 
           <Route
             path="/employee/dashboard"
