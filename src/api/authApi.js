@@ -1,7 +1,17 @@
 import api from "./axiosInstance";
 
-// ✅ Register for Employee, Driver, or Admin
-export const registerUser = (data) => api.post("/auth/register", data);
+// ✅ Register Employee
+export const registerUser = (data) =>
+  api.post("/auth/register", {
+    name: data.name,
+    email: data.email,
+    password: data.password,
+    confirmPassword: data.confirmPassword,
+  });
 
-// ✅ Login for Employee, Driver, or Admin
-export const loginUser = (data) => api.post("/auth/login", data);
+// ✅ Login Employee
+export const loginUser = (data) =>
+  api.post("/auth/login", {
+    email: data.email,
+    password: data.password,
+  });

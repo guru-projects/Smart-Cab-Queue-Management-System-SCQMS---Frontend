@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { registerUser } from "../../api/authApi";
 import logo from "../../assets/logo.png";
-import "./auth.css"; // same CSS used for login & signup pages
+import "./auth.css"; // ✅ shared login/signup styling
 
-export default function EmpSignup() {
+export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,7 +14,7 @@ export default function EmpSignup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -26,29 +27,29 @@ export default function EmpSignup() {
     }
 
     try {
-      // ✅ Mock signup logic — in real app you’d call your /auth/register API
-      const userData = { name, email, password };
-      console.log("Registered Employee:", userData);
+      // ✅ Call your backend API
+      const res = await registerUser({ name, email, password, confirmPassword });
+      console.log("Registration successful:", res.data);
 
-      setSuccess("Signup successful! Redirecting to login...");
+      setSuccess("Registration successful! Redirecting to login...");
       setTimeout(() => navigate("/employee/login"), 1800);
     } catch (err) {
       console.error(err);
-      setError("Signup failed. Try again.");
+      setError(err.response?.data?.error || "Registration failed. Try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="login-page">
       <div className="login-card">
         <div className="login-head">
           <img src={logo} alt="SCQMS" className="login-logo" />
-          <div className="login-title">Employee Signup</div>
+          <div className="login-title">Employee Registration</div>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleRegister}>
           <div className="field">
             <label>Full Name</label>
             <input
@@ -102,7 +103,7 @@ export default function EmpSignup() {
 
           <div className="actions">
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? "Registering…" : "Signup"}
+              {loading ? "Registering…" : "Register"}
             </button>
           </div>
         </form>

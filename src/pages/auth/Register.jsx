@@ -2,34 +2,46 @@ import React, { useState } from "react";
 import { registerUser } from "../../api/authApi";
 
 export default function Register() {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("EMPLOYEE");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await registerUser({ username, password, role });
-      setMessage(`Registered ${res.data.username} as ${res.data.role}`);
+      const res = await registerUser({ name, email, password, confirmPassword });
+      setMessage(res.data.message);
       console.log(res.data);
     } catch (err) {
       console.error(err);
-      setMessage("Registration failed.");
+      setMessage(err.response?.data?.error || "Registration failed.");
     }
   };
 
   return (
     <div className="container">
-      <h2>Register New User</h2>
+      <h2>Employee Registration</h2>
       <form onSubmit={handleRegister} style={{ maxWidth: 400 }}>
         <div className="form-group">
-          <label>Username</label>
+          <label>Name</label>
           <input
             type="text"
             className="form-control"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group" style={{ marginTop: 10 }}>
+          <label>Email</label>
+          <input
+            type="email"
+            className="form-control"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -46,23 +58,20 @@ export default function Register() {
         </div>
 
         <div className="form-group" style={{ marginTop: 10 }}>
-          <label>Role</label>
-          <select
+          <label>Confirm Password</label>
+          <input
+            type="password"
             className="form-control"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          >
-            <option value="EMPLOYEE">Employee</option>
-            <option value="DRIVER">Driver</option>
-            <option value="ADMIN">Admin</option>
-          </select>
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
         </div>
 
         <button type="submit" className="btn btn-success" style={{ marginTop: 15 }}>
           Register
         </button>
       </form>
-
       {message && <p style={{ marginTop: 10 }}>{message}</p>}
     </div>
   );
