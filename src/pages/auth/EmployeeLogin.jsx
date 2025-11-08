@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../../api/authApi";
 import logo from "../../assets/logo.png";
-import "./EmployeeLogin.css"; // ✅ Keep your existing styling
 
 export default function EmployeeLogin() {
   const [email, setEmail] = useState("");

@@ -1,72 +1,98 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../../api/authApi";
-import { useAuth } from "../../context/AuthContext"; // ✅ import context
+import { useAuth } from "../../context/AuthContext"; // ✅ for context login
+import logo from "../../assets/logo.png";
+import "./auth.css"; // ✅ same CSS as register page
 
 export default function EmployeeLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ get login function
+  const { login } = useAuth(); // ✅ context login handler
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
       const res = await loginUser({ email, password });
 
-      // ✅ store in localStorage
+      // ✅ Save login data
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("email", res.data.email);
       localStorage.setItem("name", res.data.name);
       localStorage.setItem("role", res.data.role);
 
-      // ✅ update context immediately
+      // ✅ Sync context so Protected route recognizes user
       login(res.data.token, {
         email: res.data.email,
         name: res.data.name,
         role: res.data.role,
       });
 
-      // ✅ redirect
+      // ✅ Redirect to dashboard
       navigate("/employee/dashboard");
     } catch (err) {
       console.error(err);
-      setMessage(err.response?.data?.error || "Login failed.");
+      setError(err.response?.data?.error || "Invalid Email or Password");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
-      <h2>Employee Login</h2>
-      <form onSubmit={handleLogin} style={{ maxWidth: 400 }}>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-head">
+          <img src={logo} alt="SCQMS" className="login-logo" />
+          <div className="login-title">Employee Login</div>
         </div>
 
-        <div className="form-group" style={{ marginTop: 10 }}>
-          <label>Password</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="field">
+            <label>Email</label>
+            <input
+              className="input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your company email"
+              required
+            />
+          </div>
 
-        <button type="submit" className="btn btn-primary" style={{ marginTop: 15 }}>
-          Login
-        </button>
-      </form>
-      {message && <p style={{ marginTop: 10 }}>{message}</p>}
+          <div className="field">
+            <label>Password</label>
+            <input
+              className="input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          {error && <div className="help-error">{error}</div>}
+
+          <div className="actions">
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? "Logging in…" : "Login"}
+            </button>
+          </div>
+        </form>
+
+        <p style={{ textAlign: "center", marginTop: "12px" }}>
+          New Employee?{" "}
+          <Link to="/employee/signup" className="link-text">
+            Register here
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

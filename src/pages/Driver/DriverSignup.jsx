@@ -1,155 +1,147 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "./DriverSignup.css"; // ✅ Same folder so correct path
-import logo from "../../assets/logo.png"; // ✅ Correct asset path
+import { useNavigate, Link } from "react-router-dom";
+import { registerDriver } from "../../api/authApi"; // ✅ You’ll create this endpoint in your API file
+import logo from "../../assets/logo.png";
+import "./DriverSignup.css";
 
 export default function DriverSignup() {
   const navigate = useNavigate();
-
-  // ✅ Company pre-registered mobile numbers (dummy — connect API later)
-  const registeredNumbers = ["9876543210", "9000012345", "8807788207"];
-
-  const [step, setStep] = useState(1);
-  const [mobile, setMobile] = useState("");
-
   const [form, setForm] = useState({
-    fullName: "",
-    licenseNumber: "",
+    name: "",
+    mobile: "",
     cabNumber: "",
     password: "",
     confirmPassword: "",
   });
 
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // ✅ Step 1: Verify mobile number
-  const checkMobile = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (registeredNumbers.includes(mobile)) {
-      alert("✅ Mobile Verified — Continue Signup");
-      setStep(2);
-    } else {
-      alert("❌ Mobile not registered with company. Contact Transport Admin.");
-    }
-  };
-
-  // ✅ Step 2: Complete signup
-  const submit = (e) => {
-    e.preventDefault();
+    setError("");
+    setSuccess("");
 
     if (form.password !== form.confirmPassword) {
-      return alert("⚠ Passwords do not match");
+      setError("⚠ Passwords do not match");
+      return;
     }
 
-    alert("✅ Driver Signup Successful — Please Login");
-    navigate("/driver/login");
+    try {
+      setLoading(true);
+      const res = await registerDriver({
+        name: form.name,
+        mobile: form.mobile,
+        cabNumber: form.cabNumber,
+        password: form.password,
+        confirmPassword: form.confirmPassword,
+      });
+
+      setSuccess("✅ Driver registered successfully! Redirecting to login...");
+      console.log("Driver Registered:", res.data);
+
+      setTimeout(() => navigate("/driver/login"), 2000);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.error || "Registration failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="signup-page">
       <div className="signup-card">
-
         <div className="signup-head">
           <img src={logo} alt="SCQMS" className="signup-logo" />
           <div className="signup-title">Driver Signup</div>
         </div>
 
-        {/* STEP 1: Mobile check */}
-        {step === 1 && (
-          <form className="signup-form" onSubmit={checkMobile}>
-            <div className="field">
-              <label>Registered Mobile Number</label>
-              <input
-                type="tel"
-                className="input"
-                placeholder="Enter registered mobile"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                required
-                pattern="[0-9]{10}"
-              />
-            </div>
+        <form className="signup-form" onSubmit={handleSubmit}>
+          <div className="field">
+            <label>Full Name</label>
+            <input
+              className="input"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+              required
+            />
+          </div>
 
-            <button className="signup-btn">Verify Number</button>
+          <div className="field">
+            <label>Mobile Number</label>
+            <input
+              className="input"
+              name="mobile"
+              type="tel"
+              value={form.mobile}
+              onChange={handleChange}
+              placeholder="Enter your 10-digit number"
+              required
+              pattern="[0-9]{10}"
+            />
+          </div>
 
-            <p className="signup-footer">
-              Already a driver? <Link to="/driver/login" className="link-text">Login</Link>
-            </p>
-          </form>
-        )}
+          <div className="field">
+            <label>Cab Number</label>
+            <input
+              className="input"
+              name="cabNumber"
+              value={form.cabNumber}
+              onChange={handleChange}
+              placeholder="Enter your cab registration number"
+              required
+            />
+          </div>
 
-        {/* STEP 2: Full form */}
-        {step === 2 && (
-          <form className="signup-form" onSubmit={submit}>
-            <div className="field">
-              <label>Full Name</label>
-              <input
-                className="input"
-                name="fullName"
-                value={form.fullName}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <div className="field">
+            <label>Password</label>
+            <input
+              className="input"
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
 
-            <div className="field">
-              <label>Driving License Number</label>
-              <input
-                className="input"
-                name="licenseNumber"
-                value={form.licenseNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <div className="field">
+            <label>Confirm Password</label>
+            <input
+              className="input"
+              type="password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Re-enter password"
+              required
+            />
+          </div>
 
-            <div className="field">
-              <label>Cab Number</label>
-              <input
-                className="input"
-                name="cabNumber"
-                value={form.cabNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          {error && <div className="help-error">{error}</div>}
+          {success && <div className="help-success">{success}</div>}
 
-            <div className="field">
-              <label>Password</label>
-              <input
-                className="input"
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="field">
-              <label>Confirm Password</label>
-              <input
-                className="input"
-                type="password"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <button className="signup-btn" type="submit">
-              Complete Signup
+          <div className="actions">
+            <button className="btn-primary" type="submit" disabled={loading}>
+              {loading ? "Registering…" : "Register"}
             </button>
+          </div>
+        </form>
 
-            <p className="signup-footer">
-              Already registered? <Link to="/driver/login" className="link-text">Login</Link>
-            </p>
-          </form>
-        )}
-
+        <p style={{ textAlign: "center", marginTop: "12px" }}>
+          Already have an account?{" "}
+          <Link to="/driver/login" className="link-text">
+            Login here
+          </Link>
+        </p>
       </div>
     </div>
   );

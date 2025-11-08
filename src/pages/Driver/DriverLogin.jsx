@@ -1,52 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { loginDriver } from "../../api/authApi"; // ✅ import API
 import logo from "../../assets/logo.png";
-import "../Driver/DriverLogin.css"; // keep your styles
-
-// test credentials
-const TEST_DRIVERS = [
-  { username: "driver01", password: "password123", name: "Ravi Kumar", id: "DRV001", phone: "9876543210" },
-  { username: "driver02", password: "password123", name: "Sekar", id: "DRV002", phone: "9876543211" }
-];
+import "../Driver/DriverLogin.css";
 
 export default function DriverLogin() {
-  const [username, setUsername] = useState("");
+  const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  async function submit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // mock auth: find a matching driver
-      const found = TEST_DRIVERS.find(
-        (d) => d.username === username && d.password === password
-      );
+      // ✅ Call backend API
+      const res = await loginDriver({ mobile, password });
 
-      if (!found) {
-        setError("Invalid username or password (use test credentials shown below)");
-        setLoading(false);
-        return;
-      }
+      // ✅ Store JWT and user details
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("mobile", res.data.mobile);
+      localStorage.setItem("name", res.data.name);
+      localStorage.setItem("role", res.data.role);
 
-      // create a dummy token and user object
-      const token = `driver-token-${found.id}`;
-      const user = { role: "driver", id: found.id, name: found.name, username: found.username };
+      // ✅ Update global auth context
+      login(res.data.token, {
+        mobile: res.data.mobile,
+        name: res.data.name,
+        role: res.data.role,
+      });
 
-      // call auth context
-      login(token, user);
-
-      // redirect to driver dashboard
+      // ✅ Redirect to driver dashboard
       navigate("/driver/dashboard");
     } catch (err) {
       console.error(err);
-      setError("Login failed");
+      setError(err.response?.data?.error || "Invalid mobile number or password");
     } finally {
       setLoading(false);
     }
@@ -60,15 +53,17 @@ export default function DriverLogin() {
           <div className="login-title">Driver Login</div>
         </div>
 
-        <form className="login-form" onSubmit={submit}>
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="field">
-            <label>Username</label>
+            <label>Mobile Number</label>
             <input
               className={`input ${error ? "error" : ""}`}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
+              type="tel"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              placeholder="Enter your mobile number"
               required
+              pattern="[0-9]{10}"
             />
           </div>
 
@@ -79,7 +74,7 @@ export default function DriverLogin() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
+              placeholder="Enter your password"
               required
             />
             {error && <div className="help-error">{error}</div>}
@@ -92,16 +87,11 @@ export default function DriverLogin() {
           </div>
         </form>
 
-        <div className="helper">
-          <span>Test drivers:</span>
-          <div style={{ textAlign: "right" }}>
-            <div><b>driver01</b> / password123</div>
-            <div><b>driver02</b> / password123</div>
-          </div>
-        </div>
-
         <p style={{ textAlign: "center", marginTop: 12 }}>
-          New driver? <Link to="/driver/signup" className="link-text">Register here</Link>
+          New driver?{" "}
+          <Link to="/driver/signup" className="link-text">
+            Register here
+          </Link>
         </p>
       </div>
     </div>
