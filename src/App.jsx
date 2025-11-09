@@ -1,6 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { QueueProvider } from "./context/QueueContext";
+import ErrorBoundary from "./pages/ErrorBoundary";
 
 /* Components */
 import Sidebar from "./components/Sidebar";
@@ -39,9 +46,11 @@ function AppLayout() {
   const location = useLocation();
   const hideSidebarRoutes = [
     "/",
-    "/employee/login", "/employee/signup",
-    "/driver/login", "/driver/signup",
-    "/admin/login"
+    "/employee/login",
+    "/employee/signup",
+    "/driver/login",
+    "/driver/signup",
+    "/admin/login",
   ];
 
   const hideSidebar = hideSidebarRoutes.includes(location.pathname);
@@ -51,9 +60,9 @@ function AppLayout() {
       {/* Sidebar visible only after login */}
       {!hideSidebar && <Sidebar />}
 
-      <div style={{ marginLeft: !hideSidebar ? "220px" : "0", padding: "15px" }}>
+      <div
+        style={{ marginLeft: !hideSidebar ? "220px" : "0", padding: "15px" }}>
         <Routes>
-
           {/* HOME */}
           <Route path="/" element={<Home />} />
 
@@ -142,12 +151,14 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <QueueProvider>
-        <BrowserRouter>
-          <AppLayout />
-        </BrowserRouter>
-      </QueueProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <QueueProvider>
+          <BrowserRouter>
+            <AppLayout />
+          </BrowserRouter>
+        </QueueProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

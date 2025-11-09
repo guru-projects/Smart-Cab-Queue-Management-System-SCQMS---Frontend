@@ -3,35 +3,47 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem("scqms_token"));
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("scqms_user"));
-    } catch {
-      return null;
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [user, setUser] = useState(null);
+
+  // ✅ Hydrate user from localStorage on reload
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedRole = localStorage.getItem("role");
+    const savedEmail = localStorage.getItem("email");
+    const savedName = localStorage.getItem("name");
+
+    if (savedToken && savedEmail) {
+      setToken(savedToken);
+      setUser({
+        role: savedRole?.toLowerCase(),
+        email: savedEmail,
+        name: savedName,
+      });
     }
+  }, []);
+
+function login(token, userData) {
+  // Save to localStorage first
+  localStorage.setItem("token", token);
+  localStorage.setItem("role", userData.role.toLowerCase());
+  localStorage.setItem("name", userData.name);
+  localStorage.setItem("email", userData.email);
+
+  // Immediately update state
+  setUser({
+    role: userData.role.toLowerCase(),
+    email: userData.email,
+    name: userData.name,
   });
+  setToken(token);
+}
 
-  useEffect(() => {
-    if (token) localStorage.setItem("scqms_token", token);
-    else localStorage.removeItem("scqms_token");
-  }, [token]);
-
-  useEffect(() => {
-    if (user) localStorage.setItem("scqms_user", JSON.stringify(user));
-    else localStorage.removeItem("scqms_user");
-  }, [user]);
-
-  function login(tokenValue, userObj) {
-    setToken(tokenValue);
-    setUser(userObj);
-  }
 
   function logout() {
-    setToken(null);
+    setToken("");
     setUser(null);
-    localStorage.removeItem("scqms_token");
-    localStorage.removeItem("scqms_user");
+    localStorage.clear();
   }
 
   return (

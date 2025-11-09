@@ -1,32 +1,45 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { getAllBookings as queueStatus } from "../api/bookingApi";
+// src/context/QueueContext.jsx
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { getAllBookings } from "../api/bookingApi";
 
 const QueueContext = createContext();
 
-export function QueueProvider({ children }) {
+export const QueueProvider = ({ children }) => {
   const [queue, setQueue] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    let active = true;
+  // ✅ Renamed & properly defined load function
+  const loadQueue = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    async function load() {
-      try {
-        const res = await queueStatus();
-        if (active && res?.data?.queue) setQueue(res.data.queue);
-      } catch {}
+      const res = await getAllBookings();
+      if (Array.isArray(res.data)) {
+        setQueue(res.data);
+      } else {
+        console.warn("⚠️ Unexpected queue API response:", res.data);
+      }
+    } catch (err) {
+      console.error("🚨 Failed to fetch queue:", err);
+    } finally {
+      setLoading(false);
     }
-    load();
-    const id = setInterval(load, 10000);
-    return () => { active = false; clearInterval(id); };
+  };
+
+  // ✅ Refresh queue every 10 seconds
+  useEffect(() => {
+    loadQueue();
+    const interval = setInterval(loadQueue, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <QueueContext.Provider value={{ queue, setQueue }}>
+    <QueueContext.Provider value={{ queue, setQueue, loading, reload: loadQueue }}>
       {children}
     </QueueContext.Provider>
   );
-}
+};
 
-export function useQueue() {
-  return useContext(QueueContext);
-}
+export const useQueue = () => useContext(QueueContext);
