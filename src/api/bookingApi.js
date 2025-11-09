@@ -4,7 +4,15 @@ import api from "./axiosInstance";
 export const createBooking = (employeeId) =>
   api.post(`/api/bookings/create/${employeeId}`);
 
-export const getAllBookings = () => api.get("/api/bookings/all");
+export const getAllBookings = async () => {
+  const token = localStorage.getItem("token");
+  return api.get("/api/bookings/all", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 
 export const getBookingsByEmployee = (employeeId) =>
   api.get(`/api/bookings/employee/${employeeId}`);

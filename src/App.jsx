@@ -4,10 +4,11 @@ import {
   Route,
   Navigate,
   useLocation,
+  Outlet,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { QueueProvider } from "./context/QueueContext";
 import ErrorBoundary from "./pages/ErrorBoundary";
+import { QueueProvider } from "./context/QueueContext";
 
 /* Components */
 import Sidebar from "./components/Sidebar";
@@ -37,11 +38,22 @@ import Cabs from "./pages/Admin/Cabs";
 
 import "./App.css";
 
+/* 🔒 Protected Route Wrapper */
 function Protected({ children }) {
   const { token } = useAuth();
   return token ? children : <Navigate to="/" replace />;
 }
 
+/* 👥 Employee Layout – wraps all employee routes with QueueProvider */
+function EmployeeLayout() {
+  return (
+    <QueueProvider>
+      <Outlet />
+    </QueueProvider>
+  );
+}
+
+/* 🧱 App Layout – handles Sidebar + Routes */
 function AppLayout() {
   const location = useLocation();
   const hideSidebarRoutes = [
@@ -57,16 +69,20 @@ function AppLayout() {
 
   return (
     <>
-      {/* Sidebar visible only after login */}
+      {/* Sidebar only for logged-in pages */}
       {!hideSidebar && <Sidebar />}
 
       <div
-        style={{ marginLeft: !hideSidebar ? "220px" : "0", padding: "15px" }}>
+        style={{
+          marginLeft: !hideSidebar ? "220px" : "0",
+          padding: "15px",
+        }}
+      >
         <Routes>
-          {/* HOME */}
+          {/* ================= HOME ================= */}
           <Route path="/" element={<Home />} />
 
-          {/* DRIVER */}
+          {/* ================= DRIVER ================= */}
           <Route path="/driver/login" element={<DriverLogin />} />
           <Route path="/driver/signup" element={<DriverSignup />} />
           <Route
@@ -78,44 +94,26 @@ function AppLayout() {
             }
           />
 
-          {/* EMPLOYEE */}
+          {/* ================= EMPLOYEE ================= */}
           <Route path="/employee/login" element={<EmpLogin />} />
           <Route path="/employee/signup" element={<EmpSignup />} />
 
+          {/* ✅ Group all employee routes inside one protected layout */}
           <Route
-            path="/employee/dashboard"
+            path="/employee"
             element={
               <Protected>
-                <EmpDashboard />
+                <EmployeeLayout />
               </Protected>
             }
-          />
-          <Route
-            path="/employee/history"
-            element={
-              <Protected>
-                <BookingHistory />
-              </Protected>
-            }
-          />
-          <Route
-            path="/employee/qr"
-            element={
-              <Protected>
-                <QRBooking />
-              </Protected>
-            }
-          />
-          <Route
-            path="/employee/queue"
-            element={
-              <Protected>
-                <QueueStatus />
-              </Protected>
-            }
-          />
+          >
+            <Route path="dashboard" element={<EmpDashboard />} />
+            <Route path="history" element={<BookingHistory />} />
+            <Route path="qr" element={<QRBooking />} />
+            <Route path="queue" element={<QueueStatus />} />
+          </Route>
 
-          {/* ADMIN */}
+          {/* ================= ADMIN ================= */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin/dashboard"
@@ -143,21 +141,21 @@ function AppLayout() {
           />
         </Routes>
 
+        {/* Footer visible on all pages */}
         <Footer />
       </div>
     </>
   );
 }
 
+/* 🌍 Main App Entry */
 export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <QueueProvider>
-          <BrowserRouter>
-            <AppLayout />
-          </BrowserRouter>
-        </QueueProvider>
+        <BrowserRouter>
+          <AppLayout />
+        </BrowserRouter>
       </AuthProvider>
     </ErrorBoundary>
   );

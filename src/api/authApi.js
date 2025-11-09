@@ -10,10 +10,10 @@ export const registerUser = (data) =>
   });
 
 // ✅ Login Employee
-export const loginUser = (data) =>
+export const loginUser = ({ email, password }) =>
   api.post("/auth/login", {
-    email: data.email,
-    password: data.password,
+    email,  // backend expects "email"
+    password,
   });
 
 // ✅ DRIVER REGISTER
