@@ -1,16 +1,12 @@
 // src/api/driverApi.js
 import api from "./axiosInstance";
 
-// driver login can use the same /auth/login if you share credentials
-import { loginUser, registerUser } from "./authApi";
-
-
-// Backend we will add: GET /api/driver/my-cab
+// ✅ Get assigned cab for driver (uses JWT for identity)
 export const getMyCab = () => api.get("/api/driver/my-cab");
 
-// Location update: use CAB endpoint that already exists (needs cabId)
-export const updateLocation = (cabId, coords) =>
-  api.put(`/cab/update-location/${cabId}?latitude=${coords.latitude}&longitude=${coords.longitude}`);
+// ✅ Update driver’s live location
+export const updateDriverLocation = ({ latitude, longitude }) =>
+  api.post("/api/driver/update-location", { latitude, longitude });
 
-// Admin view of all cabs
+// ✅ Admin view of all cabs
 export const getAllCabs = () => api.get("/cab/all");

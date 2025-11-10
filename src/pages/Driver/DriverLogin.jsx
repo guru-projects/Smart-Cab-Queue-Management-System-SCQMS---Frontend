@@ -27,6 +27,7 @@ export default function DriverLogin() {
       localStorage.setItem("mobile", res.data.mobile);
       localStorage.setItem("name", res.data.name);
       localStorage.setItem("role", res.data.role);
+      localStorage.setItem("driverId", res.data.id); // <-- backend should return driver ID
 
       // ✅ Update global auth context
       login(res.data.token, {
