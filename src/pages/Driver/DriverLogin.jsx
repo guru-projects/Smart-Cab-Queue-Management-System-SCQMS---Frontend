@@ -23,11 +23,11 @@ export default function DriverLogin() {
       const res = await loginDriver({ mobile, password });
 
       // ✅ Store JWT and user details
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("mobile", res.data.mobile);
-      localStorage.setItem("name", res.data.name);
-      localStorage.setItem("role", res.data.role);
-      localStorage.setItem("driverId", res.data.id); // <-- backend should return driver ID
+      localStorage.setItem("driver_token", res.data.token);
+      localStorage.setItem("driver_name", res.data.name);
+      localStorage.setItem("driver_mobile", res.data.mobile);
+      localStorage.setItem("driver_role", res.data.role);
+      localStorage.setItem("driver_Id", res.data.id); // <-- backend should return driver ID
 
       // ✅ Update global auth context
       login(res.data.token, {

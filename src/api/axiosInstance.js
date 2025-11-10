@@ -9,8 +9,16 @@ const api = axios.create({
 // ✅ Attach token automatically
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    const employeeToken = localStorage.getItem("token");
+    const driverToken = localStorage.getItem("driver_token");
+
+    // Auto-detect based on route
+    if (config.url.includes("/api/driver/")) {
+      if (driverToken) config.headers.Authorization = `Bearer ${driverToken}`;
+    } else if (employeeToken) {
+      config.headers.Authorization = `Bearer ${employeeToken}`;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

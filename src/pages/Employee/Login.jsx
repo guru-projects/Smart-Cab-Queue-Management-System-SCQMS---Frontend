@@ -26,6 +26,7 @@ export default function EmployeeLogin() {
       localStorage.setItem("email", res.data.email);
       localStorage.setItem("name", res.data.name);
       localStorage.setItem("role", res.data.role);
+      localStorage.setItem("employeeId", res.data.id);
 
       // ✅ Sync context so Protected route recognizes user
       login(res.data.token, {

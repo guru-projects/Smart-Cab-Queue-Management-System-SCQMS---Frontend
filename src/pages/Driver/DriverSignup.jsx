@@ -9,7 +9,6 @@ export default function DriverSignup() {
   const [form, setForm] = useState({
     name: "",
     mobile: "",
-    cabNumber: "",
     password: "",
     confirmPassword: "",
   });
@@ -36,7 +35,6 @@ export default function DriverSignup() {
       const res = await registerDriver({
         name: form.name,
         mobile: form.mobile,
-        cabNumber: form.cabNumber,
         password: form.password,
         confirmPassword: form.confirmPassword,
       });
@@ -85,18 +83,6 @@ export default function DriverSignup() {
               placeholder="Enter your 10-digit number"
               required
               pattern="[0-9]{10}"
-            />
-          </div>
-
-          <div className="field">
-            <label>Cab Number</label>
-            <input
-              className="input"
-              name="cabNumber"
-              value={form.cabNumber}
-              onChange={handleChange}
-              placeholder="Enter your cab registration number"
-              required
             />
           </div>
 
