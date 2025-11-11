@@ -12,11 +12,11 @@ export default function EmpDashboard() {
 
   const [activeBooking, setActiveBooking] = useState(null);
   const [loading, setLoading] = useState(false);
-  const DEV_MODE = true;
+  const DEV_MODE = false;
 
   const fetchActiveBooking = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token_employee");
       if (!token) return;
 
       const employeeId = user?.id || user?.employeeId || 3;

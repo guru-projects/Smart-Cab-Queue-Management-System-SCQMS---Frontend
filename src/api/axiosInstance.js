@@ -6,17 +6,25 @@ const api = axios.create({
   withCredentials: false,
 });
 
-// ✅ Attach token automatically
 api.interceptors.request.use(
   (config) => {
-    const employeeToken = localStorage.getItem("token");
-    const driverToken = localStorage.getItem("driver_token");
+    // ✅ Retrieve separate tokens
+    const empToken = localStorage.getItem("token_employee");
+    const driverToken = localStorage.getItem("token_driver");
 
-    // Auto-detect based on route
-    if (config.url.includes("/api/driver/")) {
-      if (driverToken) config.headers.Authorization = `Bearer ${driverToken}`;
-    } else if (employeeToken) {
-      config.headers.Authorization = `Bearer ${employeeToken}`;
+    // ✅ Auto-select token based on request path
+    if (config.url.includes("/api/driver/") || config.url.includes("/cab/update-location")) {
+      if (driverToken) {
+        config.headers.Authorization = `Bearer ${driverToken}`;
+      }
+    } else if (
+      config.url.includes("/api/bookings/") ||
+      config.url.includes("/api/employee/") ||
+      config.url.includes("/api/location/")
+    ) {
+      if (empToken) {
+        config.headers.Authorization = `Bearer ${empToken}`;
+      }
     }
 
     return config;
@@ -24,18 +32,24 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Handle expired JWTs
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
+
     if (status === 401) {
       console.warn("⚠️ Token expired — redirecting to login...");
-      localStorage.removeItem("token");
-      if (!window.location.pathname.includes("/login")) {
+      const path = window.location.pathname;
+
+      if (path.includes("/driver")) {
+        localStorage.removeItem("token_driver");
+        window.location.href = "/driver/login";
+      } else {
+        localStorage.removeItem("token_employee");
         window.location.href = "/employee/login";
       }
     }
+
     return Promise.reject(error);
   }
 );
