@@ -1,6 +1,10 @@
 // src/api/bookingApi.js
 import api from "./axiosInstance";
 
+export const cancelBooking = (bookingId) => {
+  return api.put(`/api/bookings/cancel/${bookingId}`);
+};
+
 export const createBooking = (employeeId) => {
   const token = localStorage.getItem("token_employee");
   return api.post(`/api/bookings/create/${employeeId}`, null, {

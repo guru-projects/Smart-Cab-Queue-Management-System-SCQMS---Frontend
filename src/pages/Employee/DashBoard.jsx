@@ -2,7 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { getBookingsByEmployee, createBooking } from "../../api/bookingApi";
+import {
+  getBookingsByEmployee,
+  createBooking,
+  cancelBooking,
+} from "../../api/bookingApi";
 import api from "../../api/axiosInstance";
 import "./EmpDashboard.css";
 
@@ -12,7 +16,7 @@ export default function EmpDashboard() {
 
   const [activeBooking, setActiveBooking] = useState(null);
   const [loading, setLoading] = useState(false);
-  const DEV_MODE = false;
+  const DEV_MODE = true;
 
   const fetchActiveBooking = async () => {
     try {
@@ -30,7 +34,7 @@ export default function EmpDashboard() {
 
       const latest = allBookings
         .reverse()
-        .find((b) => b.status !== "COMPLETED");
+        .find((b) => b.status !== "COMPLETED" && b.status !== "CANCELLED");
       setActiveBooking(latest || null);
     } catch (err) {
       console.warn("⚠️ Failed to fetch booking:", err);
@@ -40,6 +44,7 @@ export default function EmpDashboard() {
   useEffect(() => {
     if (!localStorage.getItem("token")) return;
     fetchActiveBooking();
+    console.log("🔍 Active booking data:", activeBooking);
     const interval = setInterval(fetchActiveBooking, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -67,7 +72,12 @@ export default function EmpDashboard() {
 
       if (verifyRes.data.allowed) {
         const employeeId = user?.id || user?.employeeId || 3;
-        const bookingRes = await createBooking(employeeId);
+        const bookingRes = await api.post(
+          `/api/bookings/create/${employeeId}`,
+          {
+            pickupType: "STATION",
+          }
+        );
 
         if (bookingRes.status === 200 || bookingRes.status === 201) {
           alert("🚕 Cab booked successfully!");
@@ -84,6 +94,10 @@ export default function EmpDashboard() {
     }
   };
 
+  //   const bookingRes = await api.post(`/api/bookings/create/${employeeId}`, {
+  //   pickupType: "OFFICE",
+  // });
+
   return (
     <div className="container">
       <h2 className="page-title">Employee Dashboard</h2>
@@ -95,7 +109,7 @@ export default function EmpDashboard() {
             <b>Status:</b> {activeBooking.status}
           </p>
           <p>
-            <b>Cab:</b> {activeBooking.cab?.number || "Assigning..."}
+            <b>Cab:</b> {activeBooking.cab?.cabNumber || "Assigning..."}
           </p>
           <p>
             <b>Driver:</b> {activeBooking.cab?.driver?.name || "Pending..."}
@@ -104,11 +118,44 @@ export default function EmpDashboard() {
             <b>Pickup:</b> {activeBooking.pickupLocation}
           </p>
           <p>
+            <b>Drop:</b> {activeBooking.dropLocation}
+          </p>
+
+          <p>
             <b>Booking ID:</b> {activeBooking.id}
+          </p>
+
+          <p>
+            <b>Cab Status:</b>{" "}
+            {{
+              OFFICE: "🏢 Cab at Office",
+              STATION: "🚉 Cab at Station",
+              ON_ROUTE: "🚗 Cab is on the way",
+            }[activeBooking.cab?.currentLocation] || "❓ Unknown"}
           </p>
 
           <button className="btn-secondary" onClick={fetchActiveBooking}>
             🔁 Refresh Now
+          </button>
+          <button
+            className="btn-danger"
+            onClick={async () => {
+              if (
+                window.confirm("Are you sure you want to cancel this booking?")
+              ) {
+                try {
+                  const res = await cancelBooking(activeBooking.id);
+                  if (res.status === 200) {
+                    alert("❌ Booking cancelled successfully!");
+                    setActiveBooking(null);
+                  }
+                } catch (err) {
+                  console.error("Failed to cancel booking:", err);
+                  alert("⚠️ Could not cancel booking.");
+                }
+              }
+            }}>
+            ❌ Cancel Booking
           </button>
         </div>
       ) : (

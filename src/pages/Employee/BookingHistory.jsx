@@ -1,33 +1,62 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getBookingsByEmployee } from "../../api/bookingApi";
+import { useAuth } from "../../context/AuthContext";
 
 export default function BookingHistory() {
-  const [items, setItems] = useState([]);
+  const { user } = useAuth();
+  const [myBookings, setMyBookings] = useState([]); // ✅ always define
 
   useEffect(() => {
-    (async () => {
-      const res = await myBookings();
-      setItems(res?.data?.bookings || []);
-    })();
-  }, []);
+    const fetchBookings = async () => {
+      try {
+        const employeeId = user?.id || user?.employeeId || 3;
+        const res = await getBookingsByEmployee(employeeId);
 
-  async function cancel(id) {
-    await cancelBooking(id);
-    setItems((prev) => prev.filter((b) => b.id !== id));
-  }
+        // Defensive check
+        const data = Array.isArray(res.data) ? res.data : [];
+        setMyBookings(data);
+      } catch (err) {
+        console.error("Failed to fetch booking history:", err);
+      }
+    };
+
+    fetchBookings();
+  }, [user]);
 
   return (
     <div className="container">
-      <h2 className="page-title">My Bookings</h2>
-      <div className="grid">
-        {items.map((b) => (
-          <div key={b.id} className="card">
-            <div><b>{b.route || "Guindy → Office"}</b></div>
-            <div>Status: {b.status}</div>
-            <button style={{ marginTop: 8 }} onClick={() => cancel(b.id)}>Cancel</button>
-          </div>
-        ))}
-        {!items.length && <div className="card">No bookings yet.</div>}
-      </div>
+      <h2>📜 My Booking History</h2>
+
+      {myBookings.length === 0 ? (
+        <p>No bookings yet.</p>
+      ) : (
+        <table className="booking-history-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Cab</th>
+              <th>Driver</th>
+              <th>Pickup</th>
+              <th>Drop</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {myBookings.map((b) => (
+              <tr key={b.id}>
+                <td>{b.id}</td>
+                <td>{b.status}</td>
+                <td>{b.cab?.cabNumber || "N/A"}</td>
+                <td>{b.cab?.driver?.name || "N/A"}</td>
+                <td>{b.pickupLocation || "-"}</td>
+                <td>{b.dropLocation || "-"}</td>
+                <td>{new Date(b.createdAt).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
